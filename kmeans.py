@@ -25,7 +25,9 @@ class Dado:
     def __init__(self, *args, **kwargs):
         self.ID = args
         self.dados = []
-
+    """
+        Parser da linha do csv pra estrutura
+    """
     def initialize_data(self, databaseRow):
         # inicializando o novo dado da leitura da linha do csv
         # TODO: generalizar qtd_atributos para qualquer base de dados....
@@ -38,7 +40,6 @@ class Dado:
             except ValueError:
                 _newData.dados.append((databaseRow[dados]))
         return _newData
-      
 
 class Cluster:
     
@@ -46,6 +47,11 @@ class Cluster:
         self.k = centroids
         self.center = []
 
+    """
+        Set dos centroids iniciais.
+        Randomizo 1 ponto na classe controlada 
+        e 1 ponto na classe com sindrome
+    """
     def initialize_centroids(self, Instancias:[object]):
         # randomizar 1 controlado e 1 com sindrome down
         centroid1 = Instancias[randint(1,376)]
@@ -53,12 +59,19 @@ class Cluster:
         self.center.append(centroid1)
         self.center.append(centroid2)
 
+    """
+        Cálculo da distância (euclidiana)
+        77 Dimensões
+    """
     def euclidian_distace(self, instancia:object, centroid:object)-> float:
         distance = 0.0
         for i in range(len(instancia)-1):
             distance += (instancia[i] - centroid[i])**2
         return math.sqrt(distance)
 
+    """
+        Calculo do centroids
+    """
     def mean_centroids(self, centroids:object):
         new_centroid = []
         atribute_sum = 0.0
@@ -72,17 +85,23 @@ class Cluster:
             atribute_sum = 0.0
         return new_centroid
 
+    """
+        Como os valores eram ponto flutuantes, dificultava a convergencia
+        botei um limiar entre os atributos de 0.002
+    """
     def treshoulding_stop(self, centroidAtual, novoCentroid):
         treshoulding = 0.0
         for i in range(len(centroidAtual)-1):
             treshoulding += abs(centroidAtual[i] - novoCentroid[i])
         treshold = treshoulding/(len(centroidAtual)-1)
-        if treshoulding < 0.02:
+        if treshoulding < 0.002:
             # print("Centroid Atual", centroidAtual)
             # print("Novo Centroid", novoCentroid)
             return True
 
-
+    """
+        Loop do K-means
+    """
     def run(self, Instancias: object, centroids: object):
         tempo_start = timeit.default_timer()
         new_centroid0 = []
@@ -121,7 +140,10 @@ class Cluster:
         tempo_stop = timeit.default_timer()
         tempo_stop = tempo_stop - tempo_start
         return self.validate(centroids, tempo_stop)
-
+    
+    """
+        Validação do Treinamento usando 30% da base como Teste
+    """
     def validate(self, centroids, tempoTreinamento):
         tempo_start = timeit.default_timer()
         Teste = csv_to_object("data/Data_Cortex_Teste.csv")
